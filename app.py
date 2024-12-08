@@ -1,27 +1,39 @@
-import os  # Importar os para acceder a variables de entorno
 from flask import Flask, request, jsonify
+from threading import Thread
 import joblib
 import numpy as np
+import sklearn
 
-# aplicación Flask
+# Cargar el modelo guardado
+model = joblib.load(r'C:\Users\DELL\Documents\GitHub\proyectofinalLaboDatos\random_forest_model2.joblib')
+
+
+# Crear una instancia de la aplicación Flask
 app = Flask(__name__)
 
-# cargo el modelo guardado
-model = joblib.load('random_forest_model.joblib')
-
-# endpoint para realizar predicciones
-@app.route('/predict', methods=['POST'])
+# Ruta para la predicción, que acepta solicitudes POST
+@app.route("/predict", methods = ['POST'])
 def predict():
-    # obtengo los datos de la solicitud
-    data = request.get_json()  # JSON con los datos de entrada
+    # Obtener los datos del JSON enviado en la solicitud
+    data = request.get_json(force=True)
+
+    # Convertir los datos en un array numpy
+    # Aquí 'features' debe ser una lista con todas las características de entrada
     features = np.array(data['features']).reshape(1, -1)
-    
-    # predicción
+
+    # Realizar la predicción
     prediction = model.predict(features)
-    
-    # predicción como respuesta
+
+    # Devolver la predicción como JSON
     return jsonify({'prediction': prediction.tolist()})
 
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))  # Heroku asigna un puerto dinámico
-    app.run(host='0.0.0.0', port=port, debug=True)  # Asegúrate de pasar el puerto a app.run()
+# Función para ejecutar la app de Flask
+def run_app():
+    app.run(host='0.0.0.0', port=5000)
+
+# Ejecutar la aplicación Flask en un hilo
+thread = Thread(target=run_app)
+thread.start()
+
+
+
