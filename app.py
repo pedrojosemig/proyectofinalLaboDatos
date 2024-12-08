@@ -1,12 +1,10 @@
 from flask import Flask, request, jsonify
-from threading import Thread
 import joblib
 import numpy as np
-import sklearn
+import os
 
 # Cargar el modelo guardado
 model = joblib.load(r'C:\Users\DELL\Documents\GitHub\proyectofinalLaboDatos\random_forest_model2.joblib')
-
 
 # Crear una instancia de la aplicación Flask
 app = Flask(__name__)
@@ -18,7 +16,6 @@ def predict():
     data = request.get_json(force=True)
 
     # Convertir los datos en un array numpy
-    # Aquí 'features' debe ser una lista con todas las características de entrada
     features = np.array(data['features']).reshape(1, -1)
 
     # Realizar la predicción
@@ -27,13 +24,10 @@ def predict():
     # Devolver la predicción como JSON
     return jsonify({'prediction': prediction.tolist()})
 
-# Función para ejecutar la app de Flask
-def run_app():
-    app.run(host='0.0.0.0', port=5000)
+if __name__ == "__main__":
+    # Iniciar la aplicación Flask en el puerto correcto
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
 
-# Ejecutar la aplicación Flask en un hilo
-thread = Thread(target=run_app)
-thread.start()
 
 
 
